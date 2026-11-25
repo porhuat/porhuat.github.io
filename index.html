@@ -216,7 +216,7 @@
     /* Featured */
     .featured {
       display: grid;
-      grid-template-columns: 1.2fr 1fr;
+      grid-template-columns: 1.4fr 1fr;
       border: 1px solid var(--line);
       border-radius: 28px;
       overflow: hidden;
@@ -236,6 +236,67 @@
       font-size: 6rem;
     }
     .featured-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+    .gallery { background: #0b1220; overflow: hidden; }
+    .gallery-fallback { position: relative; z-index: 0; }
+    .gallery img.slide {
+      object-fit: contain;
+      opacity: 0;
+      transform: scale(1.02);
+      transition: opacity 0.6s, transform 0.6s;
+      z-index: 1;
+    }
+    .gallery img.slide.show { opacity: 1; transform: scale(1); }
+    .gallery-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 3;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: rgba(8, 9, 12, 0.7);
+      color: var(--text);
+      font-size: 1.4rem;
+      line-height: 1;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s, background 0.2s;
+    }
+    .gallery:hover .gallery-arrow { opacity: 1; }
+    .gallery-arrow:hover { background: var(--lime); color: #000; }
+    .gallery-arrow.prev { left: 14px; }
+    .gallery-arrow.next { right: 14px; }
+    .gallery-caption {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      z-index: 3;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(8, 9, 12, 0.8);
+      border: 1px solid var(--line);
+    }
+    .gallery-caption:empty { display: none; }
+    .gallery-dots { position: absolute; right: 16px; bottom: 22px; z-index: 3; display: flex; gap: 6px; }
+    .gallery-dots button {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      border: none;
+      background: rgba(255, 255, 255, 0.35);
+      cursor: pointer;
+      padding: 0;
+      transition: width 0.25s, background 0.25s;
+    }
+    .gallery-dots button.active { width: 22px; background: var(--lime); }
+
+    .feature-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .feature-list li { color: var(--muted); font-size: 0.92rem; padding-left: 14px; border-left: 2px solid var(--lime); }
+    .feature-list b { color: var(--text); display: block; font-weight: 600; }
     .featured-body { padding: 44px; display: flex; flex-direction: column; justify-content: center; gap: 16px; }
     .featured-body h3 { font-family: var(--display); font-size: 2.6rem; line-height: 1; }
     .featured-body p { color: var(--muted); }
@@ -483,19 +544,26 @@
       </div>
 
       <article class="featured">
-        <!-- Put a ChemRealis screenshot at images/chemrealis.jpg -->
-        <div class="featured-media">
-          ⚗️
-          <img src="images/chemrealis.jpg" alt="ChemRealis" onerror="this.remove()">
+        <!-- Screenshots are listed in chemSlides in the script below -->
+        <div class="featured-media gallery" id="chemGallery">
+          <span class="gallery-fallback">⚗️</span>
+          <button class="gallery-arrow prev" id="chemPrev" aria-label="Previous screenshot">‹</button>
+          <button class="gallery-arrow next" id="chemNext" aria-label="Next screenshot">›</button>
+          <div class="gallery-caption" id="chemCaption"></div>
+          <div class="gallery-dots" id="chemDots"></div>
         </div>
         <div class="featured-body">
           <div class="label">NTU PROJECT · 2025 – NOW</div>
           <h3>ChemRealis</h3>
           <p>
-            Cross-platform chemistry software for teachers and students. Visualize molecules in 3D
-            and analyze symmetry, point groups, chirality and vibration modes on desktop,
-            in the browser, or in VR.
+            Cross-platform chemistry software for teachers and students. Explore molecules in 3D
+            and see symmetry come alive on desktop, in the browser, or in VR.
           </p>
+          <ul class="feature-list">
+            <li><b>Point Group</b> Detects the point group and animates each symmetry operation (E, C<sub>n</sub>, S<sub>n</sub>, σ, i).</li>
+            <li><b>Mirror Image</b> Shows a molecule and its mirror image side by side to explore chirality and chiral centers.</li>
+            <li><b>Vibration</b> Visualizes molecular vibration modes in real time.</li>
+          </ul>
           <div class="platforms">
             <span>Windows</span><span>WebGL</span><span>Meta Quest 3</span><span>macOS (in dev)</span>
           </div>
@@ -782,6 +850,69 @@
     document.getElementById("modalClose").onclick = closeModal;
     modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
     document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+    // ChemRealis screenshot gallery. Slides whose image is missing are skipped.
+    const chemSlides = [
+      { src: "images/chemrealis-pointgroup.jpg", caption: "Point Group · C2 rotation" },
+      { src: "images/chemrealis-s4.jpg", caption: "Point Group · S4 improper rotation" },
+      { src: "images/chemrealis-mirror.jpg", caption: "Chirality · Mirror image" },
+      { src: "images/chemrealis-vibration.jpg", caption: "Vibration modes" }
+    ];
+
+    const gallery = document.getElementById("chemGallery");
+    const caption = document.getElementById("chemCaption");
+    const dots = document.getElementById("chemDots");
+    const loadedSlides = [];
+    let slideIndex = 0;
+    let slideTimer = null;
+
+    function showSlide(i) {
+      if (!loadedSlides.length) return;
+      slideIndex = (i + loadedSlides.length) % loadedSlides.length;
+      loadedSlides.forEach((s, n) => {
+        s.img.classList.toggle("show", n === slideIndex);
+        s.dot.classList.toggle("active", n === slideIndex);
+      });
+      caption.textContent = loadedSlides[slideIndex].caption;
+    }
+
+    function startAutoplay() {
+      clearInterval(slideTimer);
+      if (loadedSlides.length > 1) slideTimer = setInterval(() => showSlide(slideIndex + 1), 4500);
+    }
+
+    chemSlides.forEach((slide, order) => {
+      const img = new Image();
+      img.className = "slide";
+      img.alt = "ChemRealis - " + slide.caption;
+      img.onload = () => {
+        const dot = document.createElement("button");
+        dot.setAttribute("aria-label", slide.caption);
+        const entry = { img, dot, caption: slide.caption, order };
+
+        // Keep slides in the order listed above, even if they load out of order
+        const pos = loadedSlides.findIndex(s => s.order > order);
+        if (pos === -1) {
+          loadedSlides.push(entry);
+          gallery.insertBefore(img, document.getElementById("chemPrev"));
+          dots.appendChild(dot);
+        } else {
+          gallery.insertBefore(img, loadedSlides[pos].img);
+          dots.insertBefore(dot, loadedSlides[pos].dot);
+          loadedSlides.splice(pos, 0, entry);
+        }
+
+        dot.onclick = () => { showSlide(loadedSlides.indexOf(entry)); startAutoplay(); };
+        showSlide(pos !== -1 && pos <= slideIndex && loadedSlides.length > 1 ? slideIndex + 1 : slideIndex);
+        startAutoplay();
+      };
+      img.src = slide.src;
+    });
+
+    document.getElementById("chemPrev").onclick = () => { showSlide(slideIndex - 1); startAutoplay(); };
+    document.getElementById("chemNext").onclick = () => { showSlide(slideIndex + 1); startAutoplay(); };
+    gallery.addEventListener("mouseenter", () => clearInterval(slideTimer));
+    gallery.addEventListener("mouseleave", startAutoplay);
 
     // Highlight the nav item of the section currently on screen
     const navLinks = document.querySelectorAll("#nav a");
