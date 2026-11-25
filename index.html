@@ -3,25 +3,783 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PorHuat Dev</title>
+  <title>Por Huat | XR Software Engineer & Game Developer</title>
+  <meta name="description" content="Portfolio of Goh Por Huat (吳部發), XR software engineer and Unity game developer based in Taipei.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg: #08090c;
+      --panel: #111318;
+      --panel-2: #171a21;
+      --line: #23272f;
+      --text: #f1f2f4;
+      --muted: #8b919c;
+      --lime: #c6ff3d;
+      --violet: #8b7bff;
+      --radius: 20px;
+      --display: "Bricolage Grotesque", sans-serif;
+      --mono: "JetBrains Mono", monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     body {
-      margin: 0;
-      min-height: 100vh;
+      font-family: "Inter", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 64px 64px;
+      opacity: 0.25;
+      mask-image: radial-gradient(ellipse at top, #000 20%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; }
+    .wrap { width: min(1200px, 92%); margin: 0 auto; }
+    .mono { font-family: var(--mono); }
+
+    /* Nav */
+    nav {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 6px;
+      background: rgba(17, 19, 24, 0.75);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+    }
+    nav a {
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      color: var(--muted);
+      transition: 0.2s;
+    }
+    nav a:hover { color: var(--text); background: var(--panel-2); }
+    nav a.nav-cta { background: var(--lime); color: #000; font-weight: 600; }
+
+    /* Hero */
+    .hero { min-height: 100vh; display: flex; align-items: center; padding: 120px 0 60px; }
+    .hero-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 56px; align-items: center; }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: var(--panel);
+    }
+    .status i {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--lime);
+      box-shadow: 0 0 12px var(--lime);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 50% { opacity: 0.35; } }
+    .hero h1 {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: clamp(3rem, 7.5vw, 6.2rem);
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+      margin: 28px 0;
+    }
+    .hero h1 em { font-style: normal; color: var(--lime); }
+    .hero h1 .outline { color: transparent; -webkit-text-stroke: 1.5px var(--text); }
+    .hero-intro { font-size: 1.12rem; color: var(--muted); max-width: 540px; }
+    .hero-intro b { color: var(--text); font-weight: 600; }
+    .hero-actions { display: flex; gap: 12px; margin-top: 36px; flex-wrap: wrap; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 24px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: transform 0.2s, background 0.2s;
+      border: 1px solid var(--line);
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-lime { background: var(--lime); color: #000; border-color: var(--lime); }
+    .btn-ghost:hover { background: var(--panel-2); }
+
+    .hero-card {
+      position: relative;
+      aspect-ratio: 4 / 5;
+      border-radius: 28px;
+      background: linear-gradient(160deg, #1e2130, #121318);
+      border: 1px solid var(--line);
+      overflow: hidden;
+      transform: rotate(2deg);
+    }
+    .hero-card img { width: 100%; height: 100%; object-fit: cover; }
+    .hero-card .fallback {
+      position: absolute;
+      inset: 0;
+      display: flex;
       align-items: center;
       justify-content: center;
-      font-family: system-ui, sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
+      font-family: var(--display);
+      font-size: 7rem;
+      font-weight: 800;
+      color: var(--lime);
     }
-    h1 { margin: 0 0 8px; }
-    p { color: #94a3b8; }
+    .hero-card .badge {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      right: 16px;
+      background: rgba(8, 9, 12, 0.8);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+    }
+    .hero-card .badge span { color: var(--muted); display: block; font-family: var(--mono); font-size: 0.72rem; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      margin-top: 56px;
+      background: var(--line);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .stat { background: var(--panel); padding: 20px 24px; }
+    .stat strong { font-family: var(--display); font-size: 1.8rem; display: block; line-height: 1.1; }
+    .stat span { color: var(--muted); font-size: 0.85rem; }
+
+    /* Marquee */
+    .marquee {
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+      overflow: hidden;
+      padding: 18px 0;
+    }
+    .marquee-track {
+      display: flex;
+      gap: 48px;
+      width: max-content;
+      animation: scroll 35s linear infinite;
+      font-family: var(--display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .marquee-track span::after { content: "✦"; color: var(--lime); margin-left: 48px; }
+    @keyframes scroll { to { transform: translateX(-50%); } }
+
+    /* Section headings */
+    section { padding: 110px 0; }
+    .label { font-family: var(--mono); color: var(--lime); font-size: 0.8rem; letter-spacing: 0.1em; }
+    .heading {
+      font-family: var(--display);
+      font-size: clamp(2.2rem, 4.5vw, 3.6rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      margin: 12px 0 0;
+    }
+    .section-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 44px; flex-wrap: wrap; }
+
+    /* Featured */
+    .featured {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      overflow: hidden;
+      background: var(--panel);
+      margin-bottom: 28px;
+    }
+    .featured-media {
+      position: relative;
+      min-height: 420px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(139, 123, 255, 0.45), transparent 55%),
+        radial-gradient(circle at 75% 70%, rgba(198, 255, 61, 0.25), transparent 50%),
+        #14161d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 6rem;
+    }
+    .featured-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .featured-body { padding: 44px; display: flex; flex-direction: column; justify-content: center; gap: 16px; }
+    .featured-body h3 { font-family: var(--display); font-size: 2.6rem; line-height: 1; }
+    .featured-body p { color: var(--muted); }
+    .platforms { display: flex; gap: 8px; flex-wrap: wrap; }
+    .platforms span {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      padding: 5px 12px;
+      border-radius: 8px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+    }
+
+    /* Filters */
+    .filters { display: flex; gap: 6px; padding: 5px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; flex-wrap: wrap; }
+    .filters button {
+      font: inherit;
+      font-size: 0.85rem;
+      color: var(--muted);
+      background: none;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+    .filters button.active { background: var(--text); color: #000; font-weight: 600; }
+    .filters button sup { font-family: var(--mono); font-size: 0.65rem; margin-left: 3px; opacity: 0.6; }
+
+    /* Project grid */
+    .projects { display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px; }
+    .project {
+      grid-column: span 4;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.25s, transform 0.25s;
+      animation: rise 0.45s both;
+    }
+    .project.wide { grid-column: span 6; }
+    .project:hover { border-color: #3a3f4a; transform: translateY(-4px); }
+    @keyframes rise { from { opacity: 0; transform: translateY(16px); } }
+
+    .media {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      background: linear-gradient(135deg, #1c1f2b, #23192b);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+    .project:hover .media img { transform: scale(1.05); }
+    .play {
+      position: absolute;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: var(--lime);
+      color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      padding-left: 4px;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: 0.25s;
+      z-index: 2;
+    }
+    .project:hover .play { opacity: 1; transform: scale(1); }
+    .chip {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 2;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(8, 9, 12, 0.8);
+      backdrop-filter: blur(6px);
+      border: 1px solid var(--line);
+    }
+
+    .project-body { padding: 22px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+    .project-body h3 { font-family: var(--display); font-size: 1.35rem; line-height: 1.2; }
+    .project-body p { color: var(--muted); font-size: 0.92rem; }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tags span { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); border: 1px solid var(--line); padding: 3px 9px; border-radius: 6px; }
+    .project-links { margin-top: auto; padding-top: 8px; display: flex; gap: 16px; font-size: 0.88rem; font-weight: 600; }
+    .project-links a, .project-links button { color: var(--lime); background: none; border: none; font: inherit; cursor: pointer; padding: 0; }
+    .project-links a:hover, .project-links button:hover { text-decoration: underline; }
+
+    /* About */
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; }
+    .about-text p { color: var(--muted); font-size: 1.05rem; margin-bottom: 18px; }
+    .about-text p b { color: var(--text); font-weight: 600; }
+    .exp { border-top: 1px solid var(--line); }
+    .exp-row {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 20px;
+      padding: 22px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .exp-row .when { font-family: var(--mono); color: var(--lime); font-size: 0.8rem; padding-top: 3px; }
+    .exp-row h4 { font-size: 1.05rem; }
+    .exp-row p { color: var(--muted); font-size: 0.9rem; }
+
+    .skills { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 64px; }
+    .skill { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; }
+    .skill h4 { font-family: var(--display); font-size: 1.2rem; margin-bottom: 14px; }
+
+    /* Contact */
+    .contact {
+      text-align: center;
+      border: 1px solid var(--line);
+      border-radius: 32px;
+      padding: 90px 32px;
+      background:
+        radial-gradient(circle at 50% 120%, rgba(198, 255, 61, 0.18), transparent 60%),
+        var(--panel);
+    }
+    .contact .heading { font-size: clamp(2.6rem, 6vw, 5rem); }
+    .contact p { color: var(--muted); margin: 20px auto 36px; max-width: 480px; }
+    .contact-links { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+
+    footer {
+      padding: 40px 0 60px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    /* Video modal */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 24px;
+    }
+    .modal.open { display: flex; }
+    .modal-box { width: min(1000px, 100%); aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #000; position: relative; }
+    .modal-box iframe { width: 100%; height: 100%; border: 0; }
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      font-size: 1.6rem;
+      color: #fff;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 960px) {
+      .hero-grid, .about-grid, .featured { grid-template-columns: 1fr; }
+      .hero-card { max-width: 340px; transform: none; }
+      .project, .project.wide { grid-column: span 6; }
+      .skills { grid-template-columns: 1fr; }
+      .featured-media { min-height: 260px; }
+      .featured-body { padding: 28px; }
+    }
+    @media (max-width: 640px) {
+      nav a:not(.nav-cta) { padding: 8px 10px; font-size: 0.8rem; }
+      .project, .project.wide { grid-column: span 12; }
+      .stats { grid-template-columns: 1fr; }
+      .exp-row { grid-template-columns: 1fr; gap: 4px; }
+      section { padding: 80px 0; }
+    }
   </style>
 </head>
 <body>
-  <h1>PorHuat Dev</h1>
-  <p>XR Software Engineer &amp; Game Developer</p>
+
+  <nav>
+    <a href="#work">Work</a>
+    <a href="#about">About</a>
+    <a href="#contact" class="nav-cta">Let's talk</a>
+  </nav>
+
+  <header class="hero">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <div class="status"><i></i> Taipei, Taiwan · Open to projects</div>
+          <h1>Building <em>worlds</em><br>you can <span class="outline">step into.</span></h1>
+          <p class="hero-intro">
+            I'm <b>Por Huat (吳部發)</b>, an XR software engineer and Unity game developer.
+            I create VR / MR training, educational simulations and games,
+            from medical procedures to molecular chemistry.
+          </p>
+          <div class="hero-actions">
+            <a href="#work" class="btn btn-lime">See my work ↓</a>
+            <a href="https://www.notion.so/porhuat/Resume-372f916383b6485888450fb51f1779d3" target="_blank" rel="noopener" class="btn btn-ghost">Resume ↗</a>
+          </div>
+        </div>
+        <!-- Put your photo at images/profile.jpg -->
+        <div class="hero-card">
+          <div class="fallback">PH</div>
+          <img src="images/profile.jpg" alt="Por Huat" onerror="this.remove()" style="position: relative;">
+          <div class="badge">
+            <span>CURRENTLY</span>
+            Research Associate @ NTU Chemistry
+          </div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><strong id="projectCount">11</strong><span>Featured projects</span></div>
+        <div class="stat"><strong>VR · MR</strong><span>Meta Quest · HoloLens 2</span></div>
+        <div class="stat"><strong>4</strong><span>Platforms: XR, PC, Web, Mobile</span></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="marquee">
+    <div class="marquee-track">
+      <span>Unity</span><span>C#</span><span>Virtual Reality</span><span>Mixed Reality</span><span>Meta Quest</span><span>HoloLens 2</span><span>WebGL</span><span>Firebase</span><span>Medical Simulation</span><span>Educational Games</span>
+      <span>Unity</span><span>C#</span><span>Virtual Reality</span><span>Mixed Reality</span><span>Meta Quest</span><span>HoloLens 2</span><span>WebGL</span><span>Firebase</span><span>Medical Simulation</span><span>Educational Games</span>
+    </div>
+  </div>
+
+  <section id="work">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="label">// 01 — SELECTED WORK</div>
+          <h2 class="heading">Projects</h2>
+        </div>
+      </div>
+
+      <article class="featured">
+        <!-- Put a ChemRealis screenshot at images/chemrealis.jpg -->
+        <div class="featured-media">
+          ⚗️
+          <img src="images/chemrealis.jpg" alt="ChemRealis" onerror="this.remove()">
+        </div>
+        <div class="featured-body">
+          <div class="label">NTU PROJECT · 2025 – NOW</div>
+          <h3>ChemRealis</h3>
+          <p>
+            Cross-platform chemistry software for teachers and students. Visualize molecules in 3D
+            and analyze symmetry, point groups, chirality and vibration modes on desktop,
+            in the browser, or in VR.
+          </p>
+          <div class="platforms">
+            <span>Windows</span><span>WebGL</span><span>Meta Quest 3</span><span>macOS (in dev)</span>
+          </div>
+          <p style="font-size: 0.88rem;">Developed at National Taiwan University, Department of Chemistry.</p>
+        </div>
+      </article>
+
+      <div class="section-head" style="margin-bottom: 24px;">
+        <div></div>
+        <div class="filters" id="filters"></div>
+      </div>
+
+      <div class="projects" id="projects"></div>
+    </div>
+  </section>
+
+  <section id="about" style="padding-top: 40px;">
+    <div class="wrap">
+      <div class="about-grid">
+        <div class="about-text">
+          <div class="label">// 02 — ABOUT</div>
+          <h2 class="heading" style="margin-bottom: 32px;">Developer from Malaysia, made in Taiwan.</h2>
+          <p>
+            I'm a Malaysian developer who loves Taiwan's culture, and I enjoy taking on
+            challenges that push my skills further.
+          </p>
+          <p>
+            My work spans <b>MR simulation training, medical VR, educational VR, corporate
+            commissioned VR, mobile apps, 2D mobile games</b> and third-person action games,
+            in both team and solo projects.
+          </p>
+          <p>
+            Currently I'm a developer on <b>ChemRealis</b> at National Taiwan University,
+            bringing molecular chemistry to desktop, web and VR.
+          </p>
+        </div>
+        <div>
+          <div class="label" style="margin-bottom: 20px;">EXPERIENCE</div>
+          <div class="exp">
+            <div class="exp-row">
+              <div class="when">2025 — NOW</div>
+              <div>
+                <h4>Research Associate · National Taiwan University</h4>
+                <p>Department of Chemistry. Developing ChemRealis for Windows, WebGL and Meta Quest.</p>
+              </div>
+            </div>
+            <div class="exp-row">
+              <div class="when">MASTER'S</div>
+              <div>
+                <h4>Project Assistant · Prof. Jen-Chi Lin</h4>
+                <p>Co-developed VR research projects, including the Metaverse Whack-a-Mole thesis.</p>
+              </div>
+            </div>
+            <div class="exp-row">
+              <div class="when">AWARD</div>
+              <div>
+                <h4>Studio A App Innovation Competition</h4>
+                <p>Award-winning iOS app projects: Aihe Coffee and HIGH-FIVE JOBS.</p>
+              </div>
+            </div>
+            <div class="exp-row">
+              <div class="when">2019</div>
+              <div>
+                <h4>Game Development Program · III</h4>
+                <p>Built the action-adventure game Western Jewel in a team of three.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="skills">
+        <div class="skill">
+          <h4>XR / VR / MR</h4>
+          <div class="tags"><span>Meta Quest</span><span>HoloLens 2</span><span>XR Interaction Toolkit</span><span>Azure Spatial Anchors</span><span>Hand Tracking</span></div>
+        </div>
+        <div class="skill">
+          <h4>Game Development</h4>
+          <div class="tags"><span>Unity</span><span>C#</span><span>WebGL</span><span>Multiplayer</span><span>iOS / Android</span></div>
+        </div>
+        <div class="skill">
+          <h4>Backend & Web</h4>
+          <div class="tags"><span>Firebase</span><span>PHP</span><span>MySQL</span><span>HTML / CSS / JS</span><span>WordPress</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" style="padding-top: 40px;">
+    <div class="wrap">
+      <div class="contact">
+        <div class="label">// 03 — CONTACT</div>
+        <h2 class="heading" style="margin-top: 16px;">Let's build<br>something together.</h2>
+        <p>Have an XR, Unity or game project in mind? I'd love to hear about it.</p>
+        <div class="contact-links">
+          <a href="mailto:Porhuat@gmail.com" class="btn btn-lime">Porhuat@gmail.com</a>
+          <a href="https://www.linkedin.com/in/%E9%83%A8%E7%99%BC-%E5%90%B3porhuat/" target="_blank" rel="noopener" class="btn btn-ghost">LinkedIn ↗</a>
+          <a href="https://www.facebook.com/Porhuat/" target="_blank" rel="noopener" class="btn btn-ghost">Facebook ↗</a>
+          <a href="https://github.com/porhuat" target="_blank" rel="noopener" class="btn btn-ghost">GitHub ↗</a>
+        </div>
+      </div>
+
+      <footer>
+        <span>© <span id="year"></span> Goh Por Huat (吳部發)</span>
+        <span class="mono">Made with Unity-level care.</span>
+      </footer>
+    </div>
+  </section>
+
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+    <div class="modal-box" id="modalBox"></div>
+  </div>
+
+  <script>
+    // Edit projects here.
+    // youtube: the video ID only. The thumbnail is loaded from YouTube automatically.
+    // image: optional custom cover in the images folder (used when there is no YouTube video).
+    // wide: true makes the card take half a row.
+    const projects = [
+      {
+        title: "Barista Latte Art Training",
+        category: "mr",
+        type: "MR · HoloLens 2",
+        wide: true,
+        youtube: "Qv_vslAaQAg",
+        description: "Mixed reality latte art trainer on HoloLens 2. Azure Spatial Anchors keep virtual coffee equipment and guides locked to the real counter, cutting the cost of milk, beans and equipment while beginners build muscle memory.",
+        tags: ["Unity", "HoloLens 2", "Azure Spatial Anchors"]
+      },
+      {
+        title: "Tracheostomy Suction VR Training",
+        category: "vr",
+        type: "Medical VR · Commissioned",
+        wide: true,
+        youtube: "yuB9wZeqGHE",
+        description: "Commissioned VR training that lets nursing students practice suction procedures anywhere. Every step is checked and synced to a backend, so teachers can track each student's progress in real time.",
+        tags: ["Unity", "VR", "Backend", "Medical"]
+      },
+      {
+        title: "Urinary Catheterization VR Training",
+        category: "vr",
+        type: "Medical VR",
+        youtube: "iAhjXaFjM0E",
+        description: "Hands-on VR simulation for practicing urinary catheterization step by step.",
+        tags: ["Unity", "VR", "Medical"]
+      },
+      {
+        title: "Microscope VR: The Mystery Toast",
+        category: "vr",
+        type: "Educational VR",
+        youtube: "7JsT2wcA0Kc",
+        description: "Gamified self-learning VR for 7th-grade biology. Students follow the scientific method, test how moisture affects mold growth, and learn to operate compound and dissecting microscopes.",
+        tags: ["Unity", "VR", "Education"]
+      },
+      {
+        title: "Metaverse Whack-a-Mole",
+        category: "vr",
+        type: "VR Game · Master's Thesis",
+        youtube: "QK6I9ADI7qA",
+        description: "A retro arcade VR whack-a-mole game, developed as my master's thesis research project.",
+        tags: ["Unity", "VR", "Research"]
+      },
+      {
+        title: "Agar Plate VR Lab",
+        category: "vr",
+        type: "Educational VR",
+        youtube: "7niKR7PjOic",
+        description: "A virtual science lab where students practice preparing agar culture media.",
+        tags: ["Unity", "VR", "Lab Simulation"]
+      },
+      {
+        title: "Siraya VR Racing",
+        category: "vr pc",
+        type: "VR · PC Racing",
+        wide: true,
+        youtube: "XEgV4tjinms",
+        description: "A racing experience played with a steering wheel, touring the scenic roads of the Siraya area, including the Dongshan Coffee Road.",
+        tags: ["Unity", "VR", "Racing Wheel", "Tourism"]
+      },
+      {
+        title: "Western Jewel",
+        category: "pc",
+        type: "PC · Action Adventure",
+        wide: true,
+        youtube: "QQI5ExKpoOM",
+        description: "A third-person action-adventure game built in 2019 with two teammates at III. Inspired by Lara Croft and the Guardian of Light, mixing puzzles, character growth and fast-paced combat.",
+        tags: ["Unity", "PC", "Team of 3"]
+      },
+      {
+        title: "Aihe Coffee",
+        category: "mobile",
+        type: "iOS App · Award",
+        icon: "☕",
+        image: "images/aihe-coffee.jpg",
+        description: "Order ahead, grab and go. A coffee pre-order and pickup app that lets commuters skip the morning queue, even for customized drinks.",
+        tags: ["iOS", "Mobile App", "Studio A"],
+        link: "https://www.straighta.com.tw/pages/2022app"
+      },
+      {
+        title: "HIGH-FIVE JOBS",
+        category: "mobile",
+        type: "iOS App · Award",
+        icon: "✋",
+        image: "images/high-five-jobs.jpg",
+        description: "A matching platform for work-exchange travelers, organizing scattered listings so newcomers can quickly find the right host.",
+        tags: ["iOS", "Mobile App", "Studio A"],
+        link: "https://www.straighta.com.tw/pages/app-2021"
+      }
+    ];
+
+    const filters = [
+      { key: "all", label: "All" },
+      { key: "vr", label: "VR" },
+      { key: "mr", label: "MR" },
+      { key: "pc", label: "PC" },
+      { key: "mobile", label: "Mobile" }
+    ];
+
+    const grid = document.getElementById("projects");
+    const filterBar = document.getElementById("filters");
+    const modal = document.getElementById("modal");
+    const modalBox = document.getElementById("modalBox");
+
+    document.getElementById("projectCount").textContent = projects.length + 1;
+
+    function matches(p, key) {
+      return key === "all" || p.category.split(" ").includes(key);
+    }
+
+    function render(key) {
+      grid.innerHTML = "";
+      projects.filter(p => matches(p, key)).forEach((p, i) => {
+        const cover = p.youtube ? `https://img.youtube.com/vi/${p.youtube}/hqdefault.jpg` : p.image;
+        const card = document.createElement("article");
+        card.className = "project" + (p.wide && key === "all" ? " wide" : "");
+        card.style.animationDelay = (i * 0.05) + "s";
+        card.innerHTML = `
+          <div class="media" ${p.youtube ? `data-video="${p.youtube}"` : ""}>
+            <span>${p.icon || "🎮"}</span>
+            ${cover ? `<img src="${cover}" alt="${p.title}" loading="lazy" onerror="this.remove()">` : ""}
+            <div class="chip">${p.type}</div>
+            ${p.youtube ? `<div class="play">▶</div>` : ""}
+          </div>
+          <div class="project-body">
+            <h3>${p.title}</h3>
+            <p>${p.description}</p>
+            <div class="tags">${p.tags.map(t => `<span>${t}</span>`).join("")}</div>
+            <div class="project-links">
+              ${p.youtube ? `<button data-video="${p.youtube}">Watch video ▶</button>` : ""}
+              ${p.link ? `<a href="${p.link}" target="_blank" rel="noopener">Learn more ↗</a>` : ""}
+            </div>
+          </div>`;
+        grid.appendChild(card);
+      });
+    }
+
+    filters.forEach((f, i) => {
+      const count = f.key === "all" ? projects.length : projects.filter(p => matches(p, f.key)).length;
+      const btn = document.createElement("button");
+      btn.innerHTML = `${f.label}<sup>${count}</sup>`;
+      if (i === 0) btn.classList.add("active");
+      btn.onclick = () => {
+        filterBar.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        render(f.key);
+      };
+      filterBar.appendChild(btn);
+    });
+
+    grid.addEventListener("click", e => {
+      const target = e.target.closest("[data-video]");
+      if (!target) return;
+      modalBox.innerHTML = `<iframe src="https://www.youtube.com/embed/${target.dataset.video}?autoplay=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`;
+      modal.classList.add("open");
+    });
+
+    function closeModal() {
+      modal.classList.remove("open");
+      modalBox.innerHTML = "";
+    }
+    document.getElementById("modalClose").onclick = closeModal;
+    modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+    render("all");
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
