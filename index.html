@@ -440,31 +440,77 @@
       gap: 12px;
     }
 
-    /* Video modal */
+    /* Project detail modal */
     .modal {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(6px);
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
       display: none;
-      align-items: center;
       justify-content: center;
+      align-items: flex-start;
       z-index: 100;
-      padding: 24px;
+      padding: 40px 20px;
+      overflow-y: auto;
     }
     .modal.open { display: flex; }
-    .modal-box { width: min(1000px, 100%); aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #000; position: relative; }
-    .modal-box iframe { width: 100%; height: 100%; border: 0; }
+    body.modal-open { overflow: hidden; }
+    .detail {
+      width: min(1040px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      overflow: hidden;
+      position: relative;
+      animation: rise 0.35s both;
+    }
     .modal-close {
       position: absolute;
-      top: 20px;
-      right: 24px;
-      font-size: 1.6rem;
+      top: 14px;
+      right: 14px;
+      z-index: 5;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: rgba(8, 9, 12, 0.8);
       color: #fff;
-      background: none;
-      border: none;
+      font-size: 1.1rem;
       cursor: pointer;
     }
+    .modal-close:hover { background: var(--lime); color: #000; }
+    .detail-media { aspect-ratio: 16 / 9; background: #000; position: relative; }
+    .detail-media iframe { width: 100%; height: 100%; border: 0; display: block; }
+    .detail-media.logo-media { aspect-ratio: 21 / 9; display: flex; align-items: center; justify-content: center; }
+    .detail-media.logo-media img { height: 70%; aspect-ratio: 1; border-radius: 28px; object-fit: cover; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45); }
+    .video-tabs { display: flex; gap: 8px; padding: 14px 28px 0; flex-wrap: wrap; }
+    .video-tabs button {
+      font: inherit;
+      font-size: 0.8rem;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: none;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .video-tabs button.active { background: var(--text); color: #000; border-color: var(--text); }
+    .detail-body { padding: 32px 36px 40px; display: grid; grid-template-columns: 1.6fr 1fr; gap: 40px; }
+    .detail-body h2 { font-family: var(--display); font-size: clamp(1.8rem, 3.5vw, 2.6rem); line-height: 1.05; margin: 10px 0 16px; }
+    .detail-body h4 { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.1em; color: var(--lime); margin: 28px 0 12px; font-weight: 600; }
+    .detail-body p.lead { color: var(--muted); font-size: 1rem; }
+    .detail-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .detail-list li { color: var(--muted); font-size: 0.93rem; padding-left: 14px; border-left: 2px solid var(--lime); }
+    .detail-list li b { color: var(--text); font-weight: 600; }
+    .meta { background: var(--panel-2); border: 1px solid var(--line); border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 16px; align-self: start; }
+    .meta div span { display: block; font-family: var(--mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 2px; }
+    .meta div { font-size: 0.92rem; }
+    .meta .award { color: var(--lime); font-weight: 600; }
+    .meta .btn { justify-content: center; margin-top: 4px; }
+
+    .media.logo-cover img { object-fit: contain; padding: 14%; }
+    .media.logo-cover img.rounded { padding: 0; width: 44%; height: auto; aspect-ratio: 1; inset: auto; position: relative; border-radius: 22px; object-fit: cover; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4); }
+    .view-detail { color: var(--text); }
 
     @media (max-width: 960px) {
       .hero-grid, .about-grid, .featured { grid-template-columns: 1fr; }
@@ -473,6 +519,8 @@
       .skills { grid-template-columns: 1fr; }
       .featured-media { min-height: 260px; }
       .featured-body { padding: 28px; }
+      .detail-body { grid-template-columns: 1fr; padding: 24px; gap: 24px; }
+      .detail-media.logo-media { aspect-ratio: 16 / 9; }
     }
     @media (max-width: 640px) {
       nav a { padding: 8px 10px; font-size: 0.8rem; }
@@ -680,14 +728,13 @@
   </section>
 
   <div class="modal" id="modal">
-    <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
-    <div class="modal-box" id="modalBox"></div>
+    <div class="detail" id="detail"></div>
   </div>
 
   <script>
     // Edit projects here.
-    // youtube: the video ID only. The thumbnail is loaded from YouTube automatically.
-    // image: optional custom cover in the images folder (used when there is no YouTube video).
+    // youtube: list of { id, label } for YouTube videos. The first one is used as the card cover.
+    // logo: app logo shown instead of a video thumbnail. logoBg sets the background color.
     // wide: true makes the card take half a row.
     const projects = [
       {
@@ -695,88 +742,202 @@
         category: "mr",
         type: "MR · HoloLens 2",
         wide: true,
-        youtube: "Qv_vslAaQAg",
+        youtube: [{ id: "Qv_vslAaQAg", label: "Demo video" }],
         description: "Mixed reality latte art trainer on HoloLens 2. Azure Spatial Anchors keep virtual coffee equipment and guides locked to the real counter, cutting the cost of milk, beans and equipment while beginners build muscle memory.",
-        tags: ["Unity", "HoloLens 2", "Azure Spatial Anchors"]
+        about: "Learning latte art is expensive: equipment is hard to get, milk and beans are costly, and beginners struggle to master the workflow and pouring technique. This HoloLens 2 training solution uses mixed reality and Azure Spatial Anchors to anchor virtual coffee equipment and guides firmly in the real environment, so trainees get the same setup every time, use fewer real ingredients, and build muscle memory through repeated practice.",
+        highlights: [
+          "<b>Spatial anchoring</b> with Azure Spatial Anchors keeps virtual equipment aligned across locations and sessions",
+          "<b>Tamper pressure detection</b> checks how hard the coffee is tamped",
+          "<b>Milk pouring</b> with simulated liquid flow",
+          "<b>Latte art path detection</b> built with DOTween Path"
+        ],
+        role: ["Solo developer, lead programmer", "Business model planning"],
+        org: "I-PLANET International",
+        tags: ["Unity", "C#", "HoloLens 2", "MRTK", "Azure Spatial Anchors", "DOTween Pro"]
       },
       {
         title: "Tracheostomy Suction VR Training",
         category: "vr",
         type: "Medical VR · Commissioned",
         wide: true,
-        youtube: "yuB9wZeqGHE",
+        youtube: [{ id: "yuB9wZeqGHE", label: "Demo video" }],
         description: "Commissioned VR training that lets nursing students practice suction procedures anywhere. Every step is checked and synced to a backend, so teachers can track each student's progress in real time.",
-        tags: ["Unity", "VR", "Backend", "Medical"]
+        about: "Nursing students can't always rehearse the suction procedure accurately. Medical Research Cloud Corporation commissioned this VR training so students can practice the full procedure across locations and time zones. Each action is checked for correctness and recorded to a backend, letting teachers follow every student's progress and give guidance.",
+        highlights: [
+          "<b>Full clinical workflow</b> from preparation to post-procedure observation",
+          "<b>Adjust oxygen flow</b> and <b>check the patient's heart rate</b> during the procedure",
+          "<b>Upload patient records</b> to the backend database",
+          "<b>Learning analytics</b> so teachers can review each student's performance"
+        ],
+        role: ["Solo developer, lead programmer"],
+        client: "Medical Research Cloud Corporation",
+        year: "2020",
+        devices: "HTC Cosmos, Oculus Rift S",
+        tags: ["Unity", "C#", "SteamVR", "Firebase", "Medical"]
       },
       {
         title: "Urinary Catheterization VR Training",
         category: "vr",
-        type: "Medical VR",
-        youtube: "iAhjXaFjM0E",
-        description: "Hands-on VR simulation for practicing urinary catheterization step by step.",
-        tags: ["Unity", "VR", "Medical"]
+        type: "Medical VR · Commissioned",
+        youtube: [{ id: "iAhjXaFjM0E", label: "Demo video" }],
+        description: "Hands-on VR simulation for practicing urinary catheterization step by step, with every action recorded for teachers to review.",
+        about: "Commissioned by Medical Research Cloud Corporation so nursing students can rehearse urinary catheterization anytime, anywhere. The simulation covers the whole procedure and records whether each step is performed correctly, sending the data to a backend in real time for teachers to follow up.",
+        highlights: [
+          "<b>Disinfect the patient</b> following the correct clinical order",
+          "<b>Pour saline</b> into the steel cup and prepare materials",
+          "<b>Secure the catheter</b> with 3M tape and <b>fill in the date</b>",
+          "<b>Upload patient records</b> to the backend database"
+        ],
+        role: ["Solo developer, lead programmer"],
+        client: "Medical Research Cloud Corporation",
+        year: "2020",
+        devices: "HTC Cosmos, Oculus Rift S",
+        tags: ["Unity", "C#", "SteamVR", "Firebase", "Medical"]
       },
       {
         title: "Microscope VR: The Mystery Toast",
         category: "vr",
-        type: "Educational VR",
-        youtube: "7JsT2wcA0Kc",
+        type: "Educational VR · Ministry of Education",
+        youtube: [
+          { id: "7JsT2wcA0Kc", label: "Introduction" },
+          { id: "Cc2ARdAI_8Q", label: "Promo video" }
+        ],
         description: "Gamified self-learning VR for 7th-grade biology. Students follow the scientific method, test how moisture affects mold growth, and learn to operate compound and dissecting microscopes.",
-        tags: ["Unity", "VR", "Education"]
+        about: "A Ministry of Education VR learning project for junior high biology, built to develop students' inquiry skills. In a virtual lab, students run a controlled-variable experiment on how moisture affects mold growth and learn to use compound and dissecting microscopes. It was showcased at the Huashan exhibition.",
+        highlights: [
+          "<b>Seven steps of the scientific method</b>: observe, ask, research, hypothesize, experiment, analyze, conclude",
+          "<b>Three learning units</b> with tutorial UI and practice levels",
+          "<b>Microscope training</b>: parts, functions, operation and imaging of compound and dissecting microscopes",
+          "<b>Firebase login</b> and learning records saved to a backend so teachers can track progress"
+        ],
+        role: ["Solo developer, lead programmer"],
+        team: "Prof. Yi-Chen Hsu & Prof. Jen-Chi Lin, with teammates on planning, project management, UI/UX, 3D art and video",
+        org: "Think Abit Lab, NTUE",
+        year: "2021",
+        tags: ["Unity", "C#", "VR", "Firebase", "Education"]
       },
       {
         title: "Metaverse Whack-a-Mole",
         category: "vr",
         type: "VR Game · Master's Thesis",
-        youtube: "QK6I9ADI7qA",
-        description: "A retro arcade VR whack-a-mole game, developed as my master's thesis research project.",
-        tags: ["Unity", "VR", "Research"]
+        youtube: [{ id: "QK6I9ADI7qA", label: "Demo video" }],
+        description: "A retro arcade VR whack-a-mole game built for my master's thesis, comparing hand tracking with controllers.",
+        about: "My master's thesis studied how hand gestures and controllers affect the VR game experience. I developed this whack-a-mole game for Meta Quest 2 as the experiment platform and tested it with 72 participants using NASA-TLX and the Game Experience Questionnaire. Results showed significant differences in mental load, physical load and performance: hand tracking felt more natural and was easier to pick up.",
+        highlights: [
+          "<b>Two control modes</b>: hand tracking and controllers",
+          "<b>Instruction UI</b> and a <b>practice level</b>",
+          "<b>Player naming system</b> and <b>score leaderboard</b>",
+          "<b>Research</b>: 72 participants, t-test analysis"
+        ],
+        role: ["Solo developer", "Researcher"],
+        org: "National Taipei University of Education",
+        year: "2023",
+        devices: "Meta Quest 2",
+        tags: ["Unity", "C#", "Hand Tracking", "Research"]
       },
       {
         title: "Agar Plate VR Lab",
         category: "vr",
-        type: "Educational VR",
-        youtube: "7niKR7PjOic",
-        description: "A virtual science lab where students practice preparing agar culture media.",
-        tags: ["Unity", "VR", "Lab Simulation"]
+        type: "Educational VR · Commissioned",
+        youtube: [{ id: "7niKR7PjOic", label: "Demo video" }],
+        description: "A virtual biology lab commissioned by Chang Gung University, where students practice preparing agar culture media.",
+        about: "Lab equipment and chemicals are hard to access, so students rarely get to review the experiment. Chang Gung University commissioned this VR lab to let students practice the agar culture experiment anywhere. It introduces the equipment and materials, walks through the full procedure, and records whether each step is done correctly.",
+        highlights: [
+          "<b>Controller tutorial</b> and <b>equipment introduction</b>",
+          "<b>Step-by-step procedure</b>: power on and tare the scale, add water to the autoclave, and more",
+          "<b>Learning records</b> sent to a backend in real time for teachers"
+        ],
+        role: ["Solo developer, lead programmer"],
+        client: "Chang Gung University",
+        year: "2020",
+        devices: "HTC Cosmos, Oculus Rift S",
+        tags: ["Unity", "C#", "SteamVR", "Firebase", "Lab Simulation"]
       },
       {
         title: "Siraya VR Racing",
         category: "vr pc",
-        type: "VR · PC Racing",
+        type: "VR Racing · Commissioned",
         wide: true,
-        youtube: "XEgV4tjinms",
-        description: "A racing experience played with a steering wheel, touring the scenic roads of the Siraya area, including the Dongshan Coffee Road.",
-        tags: ["Unity", "VR", "Racing Wheel", "Tourism"]
+        youtube: [{ id: "XEgV4tjinms", label: "Demo video" }],
+        description: "A VR racing experience for the Tainan City Government, driving through the scenic spots of the Siraya area with a real steering wheel.",
+        about: "Built for the Siraya visitor service center (Guantian Visitor Center) opened by the Tainan City Government in 2020. Visitors race through the area's main attractions, including Erliao, the 175 Coffee Road, Zengwen Reservoir and the century-old Guanziling Hot Springs. Scores are saved to a backend and shown on a daily leaderboard.",
+        highlights: [
+          "<b>Logitech G29 steering wheel</b> integrated with SteamVR, with tuned force feedback",
+          "<b>Vehicle selection</b> before each race",
+          "<b>Daily leaderboard</b> with scores stored on a backend"
+        ],
+        role: ["Solo developer, lead programmer", "Planned the full experience flow for the client", "Client communication and weekly progress updates"],
+        client: "Tainan City Government",
+        year: "2020",
+        devices: "HTC VR, Logitech G29",
+        tags: ["Unity", "C#", "SteamVR", "Firebase", "Tourism"]
       },
       {
         title: "Western Jewel",
         category: "pc",
         type: "PC · Action Adventure",
         wide: true,
-        youtube: "QQI5ExKpoOM",
+        youtube: [{ id: "QQI5ExKpoOM", label: "Trailer" }],
         description: "A third-person action-adventure game built in 2019 with two teammates at III. Inspired by Lara Croft and the Guardian of Light, mixing puzzles, character growth and fast-paced combat.",
-        tags: ["Unity", "PC", "Team of 3"]
+        about: "Built in 2019 with two classmates at the Institute for Information Industry (III). Inspired by Lara Croft and the Guardian of Light, the game focuses on puzzles, character growth and fun, fast-paced combat, with a story designed to create an emotional connection with players.",
+        highlights: [
+          "<b>Shooting combat</b> against spider monsters",
+          "<b>Power-ups</b>: green potion grants 10 seconds of invincibility",
+          "<b>Traps</b> and level mechanisms",
+          "<b>Mid boss</b> with fire, ice, invincible fireball and lightning dodge skills",
+          "<b>Final boss</b> fight with level trap design"
+        ],
+        role: ["Team lead, lead programmer", "Character, combat and boss AI systems", "Scene mechanisms, game UI, VFX and Timeline animation", "Project management and GitHub version control"],
+        team: "Team of 3: teammates handled enemy AI, audio, scene editing and game design",
+        org: "Institute for Information Industry (III)",
+        year: "2019",
+        tags: ["Unity", "C#", "Timeline", "GitHub"]
       },
       {
         title: "Aihe Coffee",
         category: "mobile",
-        type: "iOS App · Award",
-        icon: "☕",
-        image: "images/aihe-coffee.jpg",
+        type: "iOS App · Popularity Award",
+        logo: "images/aihe-coffee-logo.png",
+        logoBg: "linear-gradient(135deg, #3b2f2c, #1d1715)",
+        logoRounded: true,
+        youtube: [{ id: "KbQdFK-zVrw", label: "Promo video" }],
         description: "Order ahead, grab and go. A coffee pre-order and pickup app that lets commuters skip the morning queue, even for customized drinks.",
-        tags: ["iOS", "Mobile App", "Studio A"],
-        link: "https://www.straighta.com.tw/pages/2022app"
+        about: "Taiwan sells around 2.8 billion cups of coffee a year, yet buying one on the way to work often means queuing, especially for customized drinks. Aihe Coffee lets you order your favorite coffee before leaving home and simply grab it and go as you pass the café, without adding time to your commute.",
+        highlights: [
+          "<b>Pain point: lost time</b>. Long queues at rush hour force people to leave home earlier",
+          "<b>Pain point: uncertainty</b>. Convenience stores give no queue number, so you never know how long you'll wait",
+          "<b>Pain point: no good app</b>. Existing coffee apps are single-brand and lack pre-ordering and customization",
+          "<b>Solution</b>: one app for all coffee chains, with pre-order, customization and grab-and-go pickup"
+        ],
+        role: ["Team lead", "Lead planner and flowchart design", "Solo developer, lead programmer"],
+        team: "Team of 3: teammates handled UI/UX design, promo video and planning",
+        award: "2022 APP Mobile Application Innovation Contest · Popularity Award",
+        year: "2022",
+        tags: ["Unity", "C#", "iOS", "Product Planning"],
+        link: { label: "Contest page", url: "https://www.straighta.com.tw/pages/2022app" }
       },
       {
         title: "HIGH-FIVE JOBS",
         category: "mobile",
-        type: "iOS App · Award",
-        icon: "✋",
-        image: "images/high-five-jobs.jpg",
+        type: "iOS App · Honorable Mention",
+        logo: "images/high-five-jobs-logo.png",
+        logoBg: "linear-gradient(135deg, #ffd84d, #f5a50c)",
+        logoRounded: true,
+        youtube: [{ id: "TV1tchJGpYE", label: "Promo video" }],
         description: "A matching platform for work-exchange travelers, organizing scattered listings so newcomers can quickly find the right host.",
-        tags: ["iOS", "Mobile App", "Studio A"],
-        link: "https://www.straighta.com.tw/pages/app-2021"
+        about: "Work-exchange travel is popular with young people who want to save money while experiencing local life. But listings are scattered across social media, mixed with ads and hard to follow, and no app was designed for this need. HIGH-FIVE JOBS gathers the information in one place and helps travelers and hosts find the right match faster.",
+        highlights: [
+          "<b>Pain point: cluttered information</b>. Posts on Facebook, Instagram and LINE come in inconsistent formats",
+          "<b>Pain point: not real-time</b>. Users can't tell if a host is already full or a traveler already found a place",
+          "<b>Pain point: no local app</b>. Similar apps lack a Chinese interface and Taiwan listings",
+          "<b>Solution</b>: a dedicated matching app with organized listings and real-time status"
+        ],
+        role: ["Lead programmer", "Co-planner on product logic and UI/UX"],
+        team: "Team of 2: teammate handled art, planning, video and UI/UX design",
+        award: "2021 APP Mobile Application Innovation Contest · Honorable Mention",
+        year: "2021",
+        tags: ["Unity", "C#", "iOS", "UI/UX"],
+        link: { label: "Contest page", url: "https://www.straighta.com.tw/pages/app-2021" }
       }
     ];
 
@@ -791,7 +952,7 @@
     const grid = document.getElementById("projects");
     const filterBar = document.getElementById("filters");
     const modal = document.getElementById("modal");
-    const modalBox = document.getElementById("modalBox");
+    const detail = document.getElementById("detail");
 
     document.getElementById("projectCount").textContent = projects.length + 1;
 
@@ -799,27 +960,37 @@
       return key === "all" || p.category.split(" ").includes(key);
     }
 
+    function coverHtml(p) {
+      if (p.logo) {
+        return `<img src="${p.logo}" alt="${p.title} logo" loading="lazy" class="${p.logoRounded ? "rounded" : ""}" onerror="this.remove()">`;
+      }
+      if (p.youtube) {
+        return `<img src="https://img.youtube.com/vi/${p.youtube[0].id}/hqdefault.jpg" alt="${p.title}" loading="lazy" onerror="this.remove()">`;
+      }
+      return "";
+    }
+
     function render(key) {
       grid.innerHTML = "";
       projects.filter(p => matches(p, key)).forEach((p, i) => {
-        const cover = p.youtube ? `https://img.youtube.com/vi/${p.youtube}/hqdefault.jpg` : p.image;
+        const index = projects.indexOf(p);
         const card = document.createElement("article");
         card.className = "project" + (p.wide && key === "all" ? " wide" : "");
         card.style.animationDelay = (i * 0.05) + "s";
         card.innerHTML = `
-          <div class="media" ${p.youtube ? `data-video="${p.youtube}"` : ""}>
-            <span>${p.icon || "🎮"}</span>
-            ${cover ? `<img src="${cover}" alt="${p.title}" loading="lazy" onerror="this.remove()">` : ""}
+          <div class="media ${p.logo ? "logo-cover" : ""}" data-project="${index}" ${p.logoBg ? `style="background: ${p.logoBg}"` : ""}>
+            ${p.logo ? "" : "<span>🎮</span>"}
+            ${coverHtml(p)}
             <div class="chip">${p.type}</div>
-            ${p.youtube ? `<div class="play">▶</div>` : ""}
+            <div class="play">${p.youtube ? "▶" : "→"}</div>
           </div>
           <div class="project-body">
             <h3>${p.title}</h3>
             <p>${p.description}</p>
             <div class="tags">${p.tags.map(t => `<span>${t}</span>`).join("")}</div>
             <div class="project-links">
-              ${p.youtube ? `<button data-video="${p.youtube}">Watch video ▶</button>` : ""}
-              ${p.link ? `<a href="${p.link}" target="_blank" rel="noopener">Learn more ↗</a>` : ""}
+              <button data-project="${index}">View details →</button>
+              ${p.link ? `<a href="${p.link.url}" target="_blank" rel="noopener" class="view-detail">${p.link.label} ↗</a>` : ""}
             </div>
           </div>`;
         grid.appendChild(card);
@@ -839,18 +1010,76 @@
       filterBar.appendChild(btn);
     });
 
-    grid.addEventListener("click", e => {
-      const target = e.target.closest("[data-video]");
-      if (!target) return;
-      modalBox.innerHTML = `<iframe src="https://www.youtube.com/embed/${target.dataset.video}?autoplay=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`;
+    function videoFrame(id) {
+      return `<iframe src="https://www.youtube.com/embed/${id}" title="Project video" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+    }
+
+    function metaRow(label, value, cls) {
+      return value ? `<div class="${cls || ""}"><span>${label}</span>${value}</div>` : "";
+    }
+
+    function openDetail(index) {
+      const p = projects[index];
+      const videos = p.youtube || [];
+      let media;
+
+      if (videos.length) {
+        media = `<div class="detail-media" id="detailVideo">${videoFrame(videos[0].id)}</div>`;
+      } else if (p.logo) {
+        media = `<div class="detail-media logo-media" style="background: ${p.logoBg || "#111"}"><img src="${p.logo}" alt="${p.title} logo"></div>`;
+      } else {
+        media = "";
+      }
+
+      detail.innerHTML = `
+        <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+        ${media}
+        ${videos.length > 1 ? `<div class="video-tabs">${videos.map((v, i) => `<button data-video="${v.id}" class="${i === 0 ? "active" : ""}">${v.label}</button>`).join("")}</div>` : ""}
+        <div class="detail-body">
+          <div>
+            <div class="label">${p.type.toUpperCase()}</div>
+            <h2>${p.title}</h2>
+            <p class="lead">${p.about || p.description}</p>
+            ${p.highlights ? `<h4>KEY FEATURES</h4><ul class="detail-list">${p.highlights.map(h => `<li>${h}</li>`).join("")}</ul>` : ""}
+          </div>
+          <aside class="meta">
+            ${metaRow("AWARD", p.award, "award")}
+            ${metaRow("MY ROLE", p.role ? p.role.join("<br>") : "")}
+            ${metaRow("TEAM", p.team)}
+            ${metaRow("CLIENT", p.client)}
+            ${metaRow("ORGANIZATION", p.org)}
+            ${metaRow("YEAR", p.year)}
+            ${metaRow("DEVICES", p.devices)}
+            <div><span>TECH</span><div class="tags" style="margin-top: 6px;">${p.tags.map(t => `<span>${t}</span>`).join("")}</div></div>
+            ${p.link ? `<a href="${p.link.url}" target="_blank" rel="noopener" class="btn btn-ghost">${p.link.label} ↗</a>` : ""}
+          </aside>
+        </div>`;
+
+      detail.querySelector("#modalClose").onclick = closeModal;
+      detail.querySelectorAll(".video-tabs button").forEach(btn => {
+        btn.onclick = () => {
+          detail.querySelectorAll(".video-tabs button").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          detail.querySelector("#detailVideo").innerHTML = videoFrame(btn.dataset.video);
+        };
+      });
+
       modal.classList.add("open");
+      document.body.classList.add("modal-open");
+      modal.scrollTop = 0;
+    }
+
+    grid.addEventListener("click", e => {
+      if (e.target.closest("a")) return;
+      const target = e.target.closest("[data-project]");
+      if (target) openDetail(Number(target.dataset.project));
     });
 
     function closeModal() {
       modal.classList.remove("open");
-      modalBox.innerHTML = "";
+      document.body.classList.remove("modal-open");
+      detail.innerHTML = "";
     }
-    document.getElementById("modalClose").onclick = closeModal;
     modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
     document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 
