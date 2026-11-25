@@ -556,14 +556,17 @@
           <div class="label">NTU PROJECT · 2025 – NOW</div>
           <h3>ChemRealis</h3>
           <p>
-            Cross-platform chemistry software for teachers and students. Explore molecules in 3D
-            and see symmetry come alive on desktop, in the browser, or in VR.
+            Cross-platform chemistry software for teachers and students, built with Unity so the
+            same molecules and tools work on desktop, in the browser and in VR.
           </p>
           <ul class="feature-list">
-            <li><b>Point Group</b> Detects the point group and animates each symmetry operation (E, C<sub>n</sub>, S<sub>n</sub>, σ, i).</li>
-            <li><b>Mirror Image</b> Shows a molecule and its mirror image side by side to explore chirality and chiral centers.</li>
-            <li><b>Vibration</b> Visualizes molecular vibration modes in real time.</li>
+            <li><b>Point Group Determination</b> Automatically identifies a molecule's point group and animates its rotations and reflections.</li>
+            <li><b>Chirality Detection</b> Places a molecule beside its mirror image to check whether it is chiral or achiral.</li>
+            <li><b>Vibrational Mode Analysis</b> Animates each normal mode in 3D, showing how every atom moves.</li>
           </ul>
+          <div class="tags">
+            <span>Display Modes</span><span>Measurement</span><span>Structure Inspection</span><span>Molecule Library</span><span>Quiz Challenge</span>
+          </div>
           <div class="platforms">
             <span>Windows</span><span>WebGL</span><span>Meta Quest 3</span><span>macOS (in dev)</span>
           </div>
@@ -853,10 +856,10 @@
 
     // ChemRealis screenshot gallery. Slides whose image is missing are skipped.
     const chemSlides = [
-      { src: "images/chemrealis-pointgroup.jpg", caption: "Point Group · C2 rotation" },
-      { src: "images/chemrealis-s4.jpg", caption: "Point Group · S4 improper rotation" },
-      { src: "images/chemrealis-mirror.jpg", caption: "Chirality · Mirror image" },
-      { src: "images/chemrealis-vibration.jpg", caption: "Vibration modes" }
+      { src: "images/chemrealis-pointgroup.jpg", caption: "Point Group Determination · C2 rotation" },
+      { src: "images/chemrealis-s4.jpg", caption: "Point Group Determination · S4 improper rotation" },
+      { src: "images/chemrealis-mirror.jpg", caption: "Chirality Detection · Mirror image" },
+      { src: "images/chemrealis-vibration.jpg", caption: "Vibrational Mode Analysis" }
     ];
 
     const gallery = document.getElementById("chemGallery");
