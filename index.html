@@ -74,7 +74,8 @@
       transition: 0.2s;
     }
     nav a:hover { color: var(--text); background: var(--panel-2); }
-    nav a.nav-cta { background: var(--lime); color: #000; font-weight: 600; }
+    nav a.active,
+    nav a.active:hover { background: var(--lime); color: #000; font-weight: 600; }
 
     /* Hero */
     .hero { min-height: 100vh; display: flex; align-items: center; padding: 120px 0 60px; }
@@ -413,7 +414,7 @@
       .featured-body { padding: 28px; }
     }
     @media (max-width: 640px) {
-      nav a:not(.nav-cta) { padding: 8px 10px; font-size: 0.8rem; }
+      nav a { padding: 8px 10px; font-size: 0.8rem; }
       .project, .project.wide { grid-column: span 12; }
       .stats { grid-template-columns: 1fr; }
       .exp-row { grid-template-columns: 1fr; gap: 4px; }
@@ -423,13 +424,14 @@
 </head>
 <body>
 
-  <nav>
-    <a href="#work">Work</a>
-    <a href="#about">About</a>
-    <a href="#contact" class="nav-cta">Let's talk</a>
+  <nav id="nav">
+    <a href="#top" data-section="top" class="active">Home</a>
+    <a href="#work" data-section="work">Work</a>
+    <a href="#about" data-section="about">About</a>
+    <a href="#contact" data-section="contact">Let's talk</a>
   </nav>
 
-  <header class="hero">
+  <header class="hero" id="top">
     <div class="wrap">
       <div class="hero-grid">
         <div>
@@ -778,7 +780,31 @@
     modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
     document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 
+    // Highlight the nav item of the section currently on screen
+    const navLinks = document.querySelectorAll("#nav a");
+    const sections = [...navLinks].map(link => document.getElementById(link.dataset.section));
+
+    function updateActiveNav() {
+      const marker = window.scrollY + window.innerHeight * 0.35;
+      let current = sections[0].id;
+
+      sections.forEach(section => {
+        if (section.offsetTop <= marker) current = section.id;
+      });
+
+      // The contact section is short, so select it when the page reaches the bottom
+      if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 4) {
+        current = "contact";
+      }
+
+      navLinks.forEach(link => link.classList.toggle("active", link.dataset.section === current));
+    }
+
+    window.addEventListener("scroll", updateActiveNav, { passive: true });
+    window.addEventListener("resize", updateActiveNav);
+
     render("all");
+    updateActiveNav();
     document.getElementById("year").textContent = new Date().getFullYear();
   </script>
 </body>
