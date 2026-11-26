@@ -1064,6 +1064,15 @@
         };
       });
 
+      // Count which project people open in GoatCounter
+      if (window.goatcounter && window.goatcounter.count) {
+        window.goatcounter.count({
+          path: "project-" + p.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+          title: p.title,
+          event: true
+        });
+      }
+
       modal.classList.add("open");
       document.body.classList.add("modal-open");
       modal.scrollTop = 0;
@@ -1174,5 +1183,7 @@
     updateActiveNav();
     document.getElementById("year").textContent = new Date().getFullYear();
   </script>
+  <!-- GoatCounter visitor stats -->
+  <script data-goatcounter="https://porhuat.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
